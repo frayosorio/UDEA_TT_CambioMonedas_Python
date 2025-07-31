@@ -6,6 +6,8 @@ import csv
 from functional import seq
 from datetime import datetime
 import matplotlib.pyplot as plt
+from functools import reduce
+import math
 
 #***** Subrutinas *****
 
@@ -65,8 +67,24 @@ def graficar():
     #redimensionar la ventana
     v.minsize(imgGrafica.width(), imgGrafica.height()+100)
 
+def calcularPromedio(datos):
+    return reduce(lambda suma, item: suma + item, datos) / len(datos) \
+           if datos else 0
+
+def calcularDesviacionEstandar(datos):
+    promedio = calcularPromedio(datos)
+    return math.sqrt(reduce(lambda suma, item: suma + (item-promedio)**2, datos) / len(datos) \
+           if datos else 0)
+
 def obtenerEstadisticas():
-    pass
+    moneda = monedas[cmbMoneda.current()]
+    desde = cldDesde.get_date()
+    hasta = cldHasta.get_date()
+    datos = obtenerDatos()
+    datosFiltrados = filtrarDatos(datos, moneda, desde, hasta)
+    cambios = list(map(lambda item: item["cambio"],datosFiltrados))
+    print(calcularPromedio(cambios))
+    print(calcularDesviacionEstandar(cambios))
 
 #***** Programa Principal *****
 v = Tk()
