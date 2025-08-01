@@ -76,6 +76,31 @@ def calcularDesviacionEstandar(datos):
     return math.sqrt(reduce(lambda suma, item: suma + (item-promedio)**2, datos) / len(datos) \
            if datos else 0)
 
+def calcularMediana(datos):
+    datosOrdenados = sorted(datos)
+    n = len(datosOrdenados)
+    mediana = (lambda item: item[n//2] if n % 2 == 1 \
+               else reduce(lambda a, b: (a+b)/2, map(lambda i: item[i], [n//2, n//2-1]))) \
+                    (datosOrdenados)
+    return mediana
+
+def calcularMaximo(datos):
+    return reduce(lambda maximo, item: item if item>maximo else maximo, datos) if datos else 0
+
+def calcularMinimo(datos):
+    return reduce(lambda minimo, item: item if item<minimo else minimo, datos) if datos else 0
+
+def calcularModa(datos):
+    #contar cada dato diferente (hallar la frecuencia de cada dato)
+    frecuencias = reduce(lambda diccionarios, dato: \
+                         { **diccionarios, dato: diccionarios.get(dato, 0)+1 }, datos, {})
+    print(frecuencias)
+
+    #la moda es el dato con mayor frecuencia
+    maxFrecuencia = reduce(lambda maximo, item: item if item[1]>maximo[1] else maximo, \
+                           frecuencias.items()) if datos else 0
+    return maxFrecuencia[0]
+
 def obtenerEstadisticas():
     moneda = monedas[cmbMoneda.current()]
     desde = cldDesde.get_date()
@@ -85,6 +110,8 @@ def obtenerEstadisticas():
     cambios = list(map(lambda item: item["cambio"],datosFiltrados))
     print(calcularPromedio(cambios))
     print(calcularDesviacionEstandar(cambios))
+    print(calcularMediana(cambios))
+    print(calcularModa(cambios))
 
 #***** Programa Principal *****
 v = Tk()
