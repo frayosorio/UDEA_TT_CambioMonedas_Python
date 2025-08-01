@@ -49,6 +49,7 @@ def graficar():
     fechas, cambios = extraerFechasYCambios(datosFiltrados)
     
     #grafica
+    plt.clf()
     plt.plot(fechas, cambios)
     plt.ylabel(f"Cambios de {moneda}")
     plt.xlabel("Fecha")
@@ -66,6 +67,7 @@ def graficar():
 
     #redimensionar la ventana
     v.minsize(imgGrafica.width(), imgGrafica.height()+100)
+    panelPestañas.select(0)
 
 def calcularPromedio(datos):
     return reduce(lambda suma, item: suma + item, datos) / len(datos) \
@@ -94,8 +96,6 @@ def calcularModa(datos):
     #contar cada dato diferente (hallar la frecuencia de cada dato)
     frecuencias = reduce(lambda diccionarios, dato: \
                          { **diccionarios, dato: diccionarios.get(dato, 0)+1 }, datos, {})
-    print(frecuencias)
-
     #la moda es el dato con mayor frecuencia
     maxFrecuencia = reduce(lambda maximo, item: item if item[1]>maximo[1] else maximo, \
                            frecuencias.items()) if datos else 0
@@ -108,10 +108,29 @@ def obtenerEstadisticas():
     datos = obtenerDatos()
     datosFiltrados = filtrarDatos(datos, moneda, desde, hasta)
     cambios = list(map(lambda item: item["cambio"],datosFiltrados))
-    print(calcularPromedio(cambios))
-    print(calcularDesviacionEstandar(cambios))
-    print(calcularMediana(cambios))
-    print(calcularModa(cambios))
+
+    return {
+        "Promedio":calcularPromedio(cambios),
+        "Desviación Estandar":calcularDesviacionEstandar(cambios),
+        "Máximo":calcularMaximo(cambios),
+        "Mínimo":calcularMinimo(cambios),
+        "Mediana":calcularMediana(cambios),
+        "Moda":calcularModa(cambios)
+    }
+
+def mostrarEstadisticas():
+    #limpiar el panel
+    for item in paneles[1].winfo_children():
+        item.destroy()
+    
+    estadisticas = obtenerEstadisticas()
+
+    for i, (clave, valor) in enumerate(estadisticas.items()):
+        Util.agregarEtiqueta(paneles[1], clave, i, 0)
+        Util.agregarEtiqueta(paneles[1], valor, i, 1)
+
+    panelPestañas.select(1)
+    
 
 #***** Programa Principal *****
 v = Tk()
@@ -123,7 +142,7 @@ textos=["Gráfica Cambio vs Fecha", "Estadísticas"]
 
 botones = Util.agregarBarra(v, iconos, textos)
 botones[0].configure(command = graficar)
-botones[1].configure(command = obtenerEstadisticas)
+botones[1].configure(command = mostrarEstadisticas)
 
 #Agregar panel para selecionar monedas y rango de fechas
 panel = Frame(v)
